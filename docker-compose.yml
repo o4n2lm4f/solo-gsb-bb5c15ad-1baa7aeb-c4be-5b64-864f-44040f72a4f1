@@ -1,0 +1,26 @@
+services:
+  range-planner:
+    build: .
+    image: range-planner:latest
+    container_name: range-planner
+    ports:
+      - "3000:3000"
+    environment:
+      # Bind address inside the container.
+      HOST: "0.0.0.0"
+      # Host-side port mapping above publishes this port.
+      PORT: "3000"
+      # Reject requests with more than this many satisfiable ranges.
+      MAX_RANGES: "16"
+      # Reject plans transferring more than this many x the resource size.
+      MAX_BYTES_MULTIPLIER: "2"
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 3s
+      retries: 3
